@@ -23,17 +23,31 @@ import (
 // in ZooKeeper
 type ResourceName string
 
+// Meta is a ResourceName that indicates that the location of the Meta
+// table is what will be fetched
+var Meta ResourceName
+
+// Master is a ResourceName that indicates that the location of the Master
+// server is what will be fetched
+var Master ResourceName
+
 const (
 	sessionTimeout = 30
+	znodeRoot      = "hbase"
 
-	// Meta is a ResourceName that indicates that the location of the Meta
-	// table is what will be fetched
-	Meta = ResourceName("/hbase/meta-region-server")
-
-	// Master is a ResourceName that indicates that the location of the Master
-	// server is what will be fetched
-	Master = ResourceName("/hbase/master")
+	MetaTemplate   = "/%s/meta-region-server"
+	MasterTemplate = "/%s/master"
 )
+
+func init() {
+	SetZnodeRoot(znodeRoot)
+}
+
+// SetZnodeRoot sets the Zookeeper parent namespace
+func SetZnodeRoot(name string) {
+	Meta = ResourceName(fmt.Sprintf(MetaTemplate, name))
+	Master = ResourceName(fmt.Sprintf(MasterTemplate, name))
+}
 
 // LocateResource returns the location of the specified resource.
 func LocateResource(zkquorum string, resource ResourceName) (string, uint16, error) {

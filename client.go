@@ -343,6 +343,13 @@ func FlushInterval(interval time.Duration) Option {
 	}
 }
 
+// SetZnodeRoot will return an option that sets the root node of the Zookeeper namespace
+func SetZnodeRoot(name string) Option {
+	return func(c *client) {
+		zk.SetZnodeRoot(name)
+	}
+}
+
 // CheckTable returns an error if the given table name doesn't exist.
 func (c *client) CheckTable(ctx context.Context, table string) error {
 	getStr, err := hrpc.NewGetStr(ctx, table, "theKey")
