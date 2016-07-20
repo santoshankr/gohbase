@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
+	"github.com/tsuna/gohbase/logger"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/samuel/go-zookeeper/zk"
@@ -30,6 +30,9 @@ var Meta ResourceName
 // Master is a ResourceName that indicates that the location of the Master
 // server is what will be fetched
 var Master ResourceName
+
+// log is used to standardize logging across all subpackages
+var log = logger.Log
 
 const (
 	sessionTimeout = 30

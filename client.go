@@ -14,10 +14,10 @@ import (
 	"sync"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/cznic/b"
 	"github.com/golang/protobuf/proto"
 	"github.com/tsuna/gohbase/hrpc"
+	"github.com/tsuna/gohbase/logger"
 	"github.com/tsuna/gohbase/pb"
 	"github.com/tsuna/gohbase/region"
 	"github.com/tsuna/gohbase/zk"
@@ -48,6 +48,9 @@ var (
 	regionLookupTimeout = 30 * time.Second
 
 	backoffStart = 16 * time.Millisecond
+
+	// log is used to standardize logging across all subpackages
+	log = logger.Log
 )
 
 const (
@@ -302,9 +305,7 @@ func NewAdminClient(zkquorum string, options ...Option) AdminClient {
 }
 
 func newClient(zkquorum string, options ...Option) *client {
-	log.WithFields(log.Fields{
-		"Host": zkquorum,
-	}).Debug("Creating new client.")
+	log.Infof("Creating new client with quorum: %s", zkquorum)
 	c := &client{
 		clientType: standardClient,
 		regions:    keyRegionCache{regions: b.TreeNew(region.CompareGeneric)},

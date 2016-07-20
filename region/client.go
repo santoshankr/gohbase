@@ -14,10 +14,9 @@ import (
 	"sync"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
-
 	"github.com/golang/protobuf/proto"
 	"github.com/tsuna/gohbase/hrpc"
+	"github.com/tsuna/gohbase/logger"
 	"github.com/tsuna/gohbase/pb"
 )
 
@@ -42,6 +41,9 @@ var (
 		"org.apache.hadoop.hbase.exceptions.RegionMovedException":   struct{}{},
 		"org.apache.hadoop.hbase.exceptions.RegionOpeningException": struct{}{},
 	}
+
+	// log is used to standardize logging across all subpackages
+	log = logger.Log
 )
 
 const (
@@ -274,9 +276,7 @@ func (c *Client) receiveRpcs() {
 		c.sentRPCsMutex.Unlock()
 
 		if !ok {
-			log.WithFields(log.Fields{
-				"CallId": *resp.CallId,
-			}).Error("Received a response with an unexpected call ID")
+			log.Errorf("Received a response with an unexpected call ID: %v", *resp.CallId)
 
 			log.Error("Waiting for responses to the following calls:")
 			c.sentRPCsMutex.Lock()
