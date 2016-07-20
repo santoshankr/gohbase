@@ -50,11 +50,12 @@ type Scan struct {
 }
 
 // baseScan returns a Scan struct with default values set.
-func baseScan(ctx context.Context, table []byte,
+func baseScan(ctx context.Context, table []byte, key []byte,
 	options ...func(Call) error) (*Scan, error) {
 	s := &Scan{
 		base: base{
 			table: table,
+			key:   key,
 			ctx:   ctx,
 		},
 		fromTimestamp: MinTimestamp,
@@ -73,7 +74,8 @@ func baseScan(ctx context.Context, table []byte,
 
 // NewScan creates a scanner for the given table.
 func NewScan(ctx context.Context, table []byte, options ...func(Call) error) (*Scan, error) {
-	return baseScan(ctx, table, options...)
+	startRow := make([]byte, 0)
+	return baseScan(ctx, table, startRow, options...)
 }
 
 // NewScanRange creates a scanner for the given table and key range.
@@ -81,7 +83,7 @@ func NewScan(ctx context.Context, table []byte, options ...func(Call) error) (*S
 // included in the range.
 func NewScanRange(ctx context.Context, table, startRow, stopRow []byte,
 	options ...func(Call) error) (*Scan, error) {
-	scan, err := baseScan(ctx, table, options...)
+	scan, err := baseScan(ctx, table, startRow, options...)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +110,7 @@ func NewScanRangeStr(ctx context.Context, table, startRow, stopRow string,
 // are not expected to deal with scanner IDs.
 func NewScanFromID(ctx context.Context, table []byte,
 	scannerID uint64, startRow []byte) *Scan {
-	scan, _ := baseScan(ctx, table)
+	scan, _ := baseScan(ctx, table, startRow)
 	scan.scannerID = scannerID
 	return scan
 }
@@ -118,7 +120,7 @@ func NewScanFromID(ctx context.Context, table []byte,
 // to deal with scanner IDs.
 func NewCloseFromID(ctx context.Context, table []byte,
 	scannerID uint64, startRow []byte) *Scan {
-	scan, _ := baseScan(ctx, table)
+	scan, _ := baseScan(ctx, table, startRow)
 	scan.scannerID = scannerID
 	scan.closeScanner = true
 	return scan
