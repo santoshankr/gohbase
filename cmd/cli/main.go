@@ -13,7 +13,7 @@ import (
 	"golang.org/x/net/context"
 )
 
-var zkquorum = flag.String("zkquorum", "localhost",
+var zkquorum = flag.String("zkquorum", "localhost:2181",
 	"Specification of the ZooKeeper quorum")
 
 func main() {
