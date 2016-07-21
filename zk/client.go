@@ -9,13 +9,12 @@ package zk
 import (
 	"encoding/binary"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/tsuna/gohbase/logger"
 
+	"github.com/dropbox/gozk/zookeeper"
 	"github.com/golang/protobuf/proto"
-	"github.com/samuel/go-zookeeper/zk"
 	"github.com/tsuna/gohbase/pb"
 )
 
@@ -54,14 +53,15 @@ func SetZnodeRoot(name string) {
 
 // LocateResource returns the location of the specified resource.
 func LocateResource(zkquorum string, resource ResourceName) (string, uint16, error) {
-	zks := strings.Split(zkquorum, ",")
-	zkconn, _, err := zk.Connect(zks, time.Duration(sessionTimeout)*time.Second)
+	zkconn, _, err := zookeeper.Dial(zkquorum, time.Duration(sessionTimeout)*time.Second)
 	if err != nil {
 		return "", 0,
-			fmt.Errorf("Error connecting to ZooKeeper at %v: %s", zks, err)
+			fmt.Errorf("Error connecting to ZooKeeper at %v: %s", zkquorum, err)
 	}
 	defer zkconn.Close()
-	buf, _, err := zkconn.Get(string(resource))
+	sbuf, _, err := zkconn.Get(string(resource))
+
+	buf := []byte(sbuf)
 	if err != nil {
 		return "", 0,
 			fmt.Errorf("Failed to read the %s znode: %s", resource, err)
@@ -79,6 +79,7 @@ func LocateResource(zkquorum string, resource ResourceName) (string, uint16, err
 	buf = buf[1+4+metadataLen:]
 	magic := binary.BigEndian.Uint32(buf)
 	const pbufMagic = 1346524486 // 4 bytes: "PBUF"
+
 	if magic != pbufMagic {
 		return "", 0, fmt.Errorf("Invalid magic number for %s: %d", resource, magic)
 	}

@@ -1019,6 +1019,7 @@ func (c *client) zkLookup(ctx context.Context, res zk.ResourceName) (string, uin
 // Synchronously looks up the meta region or HMaster in ZooKeeper.
 func (c *client) zkLookupSync(res zk.ResourceName, reschan chan<- zkResult) {
 	host, port, err := zk.LocateResource(c.zkquorum, res)
+
 	// This is guaranteed to never block as the channel is always buffered.
 	reschan <- zkResult{host, port, err}
 }
